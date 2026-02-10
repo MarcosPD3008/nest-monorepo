@@ -1,0 +1,27 @@
+{
+  "name": "backend-common",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "src/libs/backend/common/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/src/libs/backend/common",
+        "tsConfig": "src/libs/backend/common/tsconfig.lib.json",
+        "packageJson": "src/libs/backend/common/package.json",
+        "main": "src/libs/backend/common/src/index.ts",
+        "assets": ["src/libs/backend/common/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "src/libs/backend/common/jest.config.cts"
+      }
+    }
+  }
+}

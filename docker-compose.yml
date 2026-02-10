@@ -1,0 +1,84 @@
+# ============================================
+# Docker Compose - Nest Monorepo
+# ============================================
+# Ejecutar: docker-compose up --build
+# Desarrollo: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # ----------------------------------------
+  # Database - PostgreSQL
+  # ----------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: nest-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nest_monorepo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nest_monorepo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------
+  # API - NestJS Backend
+  # ----------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: src/apps/api/Dockerfile
+    container_name: nest-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=password
+      - DB_DATABASE=nest_monorepo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ----------------------------------------
+  # Web - Angular Frontend
+  # ----------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: src/apps/web/Dockerfile
+    container_name: nest-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
+

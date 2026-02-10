@@ -1,0 +1,44 @@
+# ============================================
+# Docker Compose - Development Override
+# ============================================
+# Uso: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: nest_monorepo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
+  api:
+    build:
+      target: builder
+    volumes:
+      - ./src/apps/api:/app/src/apps/api:delegated
+      - ./src/libs:/app/src/libs:delegated
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=password
+      - DB_DATABASE=nest_monorepo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npx nx serve api --host=0.0.0.0
+
+  web:
+    build:
+      context: .
+      dockerfile: src/apps/web/Dockerfile.dev
+    volumes:
+      - ./src/apps/web:/app/src/apps/web:delegated
+      - ./src/libs:/app/src/libs:delegated
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+    command: npx nx serve web --host=0.0.0.0
+

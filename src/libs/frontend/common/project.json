@@ -1,0 +1,27 @@
+{
+  "name": "frontend-common",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "src/libs/frontend/common/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/src/libs/frontend/common",
+        "tsConfig": "src/libs/frontend/common/tsconfig.lib.json",
+        "packageJson": "src/libs/frontend/common/package.json",
+        "main": "src/libs/frontend/common/src/index.ts",
+        "assets": ["src/libs/frontend/common/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "src/libs/frontend/common/jest.config.cts"
+      }
+    }
+  }
+}

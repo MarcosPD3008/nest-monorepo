@@ -1,32 +1,157 @@
-# NestMonorepo
+# Nest Monorepo
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+Monorepo con **NestJS** (backend) y **Angular** (frontend) usando **Nx**.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## 📁 Estructura del Proyecto
 
-## Run tasks
-
-To run tasks with Nx use:
-
-```sh
-npx nx <target> <project-name>
+```
+src/
+├── apps/
+│   ├── api/          # 🟢 Aplicación NestJS (Backend)
+│   ├── api-e2e/      # Tests E2E del API
+│   ├── web/          # 🔵 Aplicación Angular (Frontend)
+│   └── web-e2e/      # Tests E2E del Frontend
+├── e2e/
+│   ├── api/          # Tests E2E del API (Jest)
+│   └── web/          # Tests E2E del Frontend (Playwright)
+└── libs/
+    ├── backend/
+    │   └── config/   # ⚙️ Configuración backend (TypeORM, PostgreSQL)
+    └── shared/
+        └── models/   # 📦 Interfaces compartidas
 ```
 
-For example:
+## 🚀 Comandos principales
+
+### Desarrollo
 
 ```sh
-npx nx build myproject
+# Iniciar API (NestJS) - http://localhost:3000
+npx nx serve api
+
+# Iniciar Web (Angular) - http://localhost:4200
+npx nx serve web
+
+# Iniciar ambos en paralelo
+npx nx run-many -t serve -p api web
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Build
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```sh
+# Build del API
+npx nx build api
 
-## Add new projects
+# Build de la Web
+npx nx build web
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+# Build de todo
+npx nx run-many -t build
+```
+
+### Tests
+
+```sh
+# Tests unitarios
+npx nx test api
+npx nx test web
+
+# Tests E2E
+npx nx e2e api-e2e
+npx nx e2e web-e2e
+```
+
+### Lint
+
+```sh
+npx nx lint api
+npx nx lint web
+npx nx run-many -t lint
+```
+
+## 📦 Generar nuevas librerías
+
+```sh
+# Librería TypeScript compartida
+npx nx g @nx/js:library --name=my-lib --directory=src/libs/shared/my-lib
+
+# Librería Angular
+npx nx g @nx/angular:library --name=ui --directory=src/libs/ui
+
+# Librería NestJS
+npx nx g @nx/nest:library --name=data-access --directory=src/libs/api/data-access
+```
+
+## ⚙️ Librería Backend Config
+
+La librería `@nest-monorepo/backend-config` proporciona configuración completa de backend:
+
+- **TypeORM** con PostgreSQL
+- **Entidades base** con timestamps automáticos
+- **Servicios CRUD** genéricos y específicos
+- **DTOs** con validación
+- **Controladores** de ejemplo
+
+### Uso básico
+
+```typescript
+import { BackendConfigModule } from '@nest-monorepo/backend-config';
+
+@Module({
+  imports: [
+    BackendConfigModule.forRootAsync({
+      includeControllers: true, // APIs REST automáticas
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### Variables de entorno (.env)
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_DATABASE=nest_monorepo
+```
+
+### Crear nuevas entidades
+
+```typescript
+import { Entity, Column } from 'typeorm';
+import { BaseEntityWithTimestamps } from '@nest-monorepo/backend-config';
+
+@Entity('products')
+export class Product extends BaseEntityWithTimestamps {
+  @Column()
+  name: string;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  price: number;
+}
+```
+
+## 🔧 Usar librerías compartidas
+
+Importa los modelos compartidos en tus aplicaciones:
+
+```typescript
+import { User, ApiResponse } from '@libs/shared';
+```
+
+## 📊 Visualizar el grafo de dependencias
+
+```sh
+npx nx graph
+```
+
+---
+
+[Learn more about Nx](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
 
 To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
 ```sh
@@ -73,6 +198,28 @@ npx nx g ci-workflow
 ```
 
 [Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+## 🐳 Docker
+
+El proyecto incluye configuración completa de Docker con PostgreSQL.
+
+### Producción (todos los servicios)
+```bash
+docker-compose up --build
+```
+
+### Desarrollo (con hot reload)
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+### Servicios incluidos
+- **PostgreSQL**: Base de datos (puerto 5432)
+- **API (NestJS)**: Backend (puerto 3000)
+- **Web (Angular)**: Frontend (puerto 80/4200)
+
+### Variables de entorno
+Copia `.env.example` a `.env` y configura las variables de base de datos.
 
 ## Install Nx Console
 
