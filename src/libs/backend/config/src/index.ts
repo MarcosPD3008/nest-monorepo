@@ -5,6 +5,7 @@ export * from './lib/users/entities/user.entity';
 export * from './lib/users/services/base.service';
 export * from './lib/users/services/user.service';
 export * from './lib/users/dto/user.dto';
+export * from './lib/utils/odata-filter-backend';
 export { Repository, Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 export { Injectable, Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 export { IsEmail, IsNotEmpty, IsOptional, MinLength, MaxLength, IsString, IsNumber } from 'class-validator';

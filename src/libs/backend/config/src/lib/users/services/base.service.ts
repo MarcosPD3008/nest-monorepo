@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository, FindManyOptions, FindOneOptions, DeepPartial } from 'typeorm';
+import { Repository, FindManyOptions, FindOneOptions, DeepPartial, FindOptionsWhere } from 'typeorm';
 import { BaseEntityWithTimestamps } from '../entities/base.entity';
+import { PaginatedResponse } from '@libs/shared';
 
 @Injectable()
 export abstract class BaseService<T extends BaseEntityWithTimestamps> {
@@ -13,6 +14,63 @@ export abstract class BaseService<T extends BaseEntityWithTimestamps> {
 
   async findAll(options?: FindManyOptions<T>): Promise<T[]> {
     return await this.repository.find(options);
+  }
+
+  /**
+   * Find all with pagination support
+   * @param page Page number (1-indexed)
+   * @param pageSize Number of items per page
+   * @param where Optional where conditions
+   * @param relations Optional relations to load
+   * @returns Paginated response with items and total count
+   */
+  async findAllPaginated(
+    page: number = 1,
+    pageSize: number = 10,
+    where?: FindOptionsWhere<T>,
+    relations?: string[]
+  ): Promise<PaginatedResponse<T>> {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const [items, total] = await this.repository.findAndCount({
+      where,
+      relations,
+      skip,
+      take,
+    });
+
+    return {
+      items,
+      total,
+    };
+  }
+
+  /**
+   * Find all with pagination and custom options
+   * @param options Find options including where, relations, order, etc.
+   * @param page Page number (1-indexed)
+   * @param pageSize Number of items per page
+   * @returns Paginated response with items and total count
+   */
+  async findAllPaginatedWithOptions(
+    options: FindManyOptions<T>,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<PaginatedResponse<T>> {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const [items, total] = await this.repository.findAndCount({
+      ...options,
+      skip,
+      take,
+    });
+
+    return {
+      items,
+      total,
+    };
   }
 
   async findOne(options: FindOneOptions<T>): Promise<T> {
