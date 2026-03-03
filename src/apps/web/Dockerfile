@@ -1,35 +1,18 @@
 # ============================================
-# Angular Web - Multi-stage Dockerfile
+# React (Vite) Web - Multi-stage Dockerfile
 # ============================================
 
 # Stage 1: Build
 FROM node:20-alpine AS builder
-
 WORKDIR /app
-
-# Copiar archivos de dependencias
 COPY package*.json ./
-
-# Instalar dependencias
 RUN npm ci
-
-# Copiar el código fuente
 COPY . .
-
-# Build de la aplicación Angular
 RUN npx nx build web --configuration=production
 
-# Stage 2: Production con Nginx
-FROM nginx:alpine AS production
-
-# Copiar configuración personalizada de nginx
-COPY src/apps/web/nginx.conf /etc/nginx/nginx.conf
-
-# Copiar los archivos build de Angular
-COPY --from=builder /app/dist/src/apps/web/browser /usr/share/nginx/html
-
-# Exponer puerto 80
+# Stage 2: Serve with nginx
+FROM nginx:alpine AS runner
+COPY --from=builder /app/dist/src/apps/web /usr/share/nginx/html
+RUN echo 'server { root /usr/share/nginx/html; index index.html; location / { try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-# Nginx ya corre como proceso principal
 CMD ["nginx", "-g", "daemon off;"]

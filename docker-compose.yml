@@ -60,7 +60,7 @@ services:
       start_period: 40s
 
   # ----------------------------------------
-  # Web - Angular Frontend
+  # Web - React (Vite) Frontend
   # ----------------------------------------
   web:
     build:

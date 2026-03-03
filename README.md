@@ -2,7 +2,7 @@
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-Monorepo con **NestJS** (backend) y **Angular** (frontend) usando **Nx**.
+Monorepo con **NestJS** (backend) y **React** (TypeScript + react-router-dom + Vite) en el frontend usando **Nx**.
 
 ## 📁 Estructura del Proyecto
 
@@ -11,16 +11,15 @@ src/
 ├── apps/
 │   ├── api/          # 🟢 Aplicación NestJS (Backend)
 │   ├── api-e2e/      # Tests E2E del API
-│   ├── web/          # 🔵 Aplicación Angular (Frontend)
-│   └── web-e2e/      # Tests E2E del Frontend
+│   └── web/          # 🔵 Aplicación React (Vite, react-router-dom)
 ├── e2e/
-│   ├── api/          # Tests E2E del API (Jest)
-│   └── web/          # Tests E2E del Frontend (Playwright)
+│   └── api/          # Tests E2E del API (Jest)
 └── libs/
     ├── backend/
-    │   └── config/   # ⚙️ Configuración backend (TypeORM, PostgreSQL)
+    │   ├── config/   # ⚙️ Configuración backend (TypeORM, PostgreSQL)
+    │   └── common/   # Utilidades backend
     └── shared/
-        └── models/   # 📦 Interfaces compartidas
+        └── models/  # 📦 Interfaces compartidas
 ```
 
 ## 🚀 Comandos principales
@@ -31,7 +30,7 @@ src/
 # Iniciar API (NestJS) - http://localhost:3000
 npx nx serve api
 
-# Iniciar Web (Angular) - http://localhost:4200
+# Iniciar Web (React) - http://localhost:4200
 npx nx serve web
 
 # Iniciar ambos en paralelo
@@ -56,11 +55,9 @@ npx nx run-many -t build
 ```sh
 # Tests unitarios
 npx nx test api
-npx nx test web
 
-# Tests E2E
+# Tests E2E del API
 npx nx e2e api-e2e
-npx nx e2e web-e2e
 ```
 
 ### Lint
@@ -76,9 +73,6 @@ npx nx run-many -t lint
 ```sh
 # Librería TypeScript compartida
 npx nx g @nx/js:library --name=my-lib --directory=src/libs/shared/my-lib
-
-# Librería Angular
-npx nx g @nx/angular:library --name=ui --directory=src/libs/ui
 
 # Librería NestJS
 npx nx g @nx/nest:library --name=data-access --directory=src/libs/api/data-access
@@ -156,22 +150,11 @@ npx nx graph
 
 [Learn more about Nx](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
 
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
+To install a new plugin you can use the `nx add` command. For example, to add the React plugin (already included):
+
 ```sh
 npx nx add @nx/react
 ```
-
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
-
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
-
-# Generate a library
-npx nx g @nx/react:lib some-lib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
 
 [Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
@@ -185,13 +168,6 @@ To connect to Nx Cloud, run the following command:
 npx nx connect
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
 ### Step 2
 
 Use the following command to configure a CI workflow for your workspace:
@@ -200,28 +176,30 @@ Use the following command to configure a CI workflow for your workspace:
 npx nx g ci-workflow
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
 ## 🐳 Docker
 
 El proyecto incluye configuración completa de Docker con PostgreSQL.
 
 ### Producción (todos los servicios)
+
 ```bash
 docker-compose up --build
 ```
 
+- **PostgreSQL**: puerto 5432
+- **API (NestJS)**: puerto 3000
+- **Web (React)**: puerto 80
+
 ### Desarrollo (con hot reload)
+
 ```bash
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
-### Servicios incluidos
-- **PostgreSQL**: Base de datos (puerto 5432)
-- **API (NestJS)**: Backend (puerto 3000)
-- **Web (Angular)**: Frontend (puerto 80/4200)
-
 ### Variables de entorno
+
 Copia `.env.example` a `.env` y configura las variables de base de datos.
 
 ## Install Nx Console
@@ -240,7 +218,8 @@ Learn more:
 - [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
 And join the Nx community:
+
 - [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Follow on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
+- [Youtube channel](https://www.youtube.com/@nxdevtools)
+- [Blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
